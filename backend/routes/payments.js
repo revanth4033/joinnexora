@@ -1,11 +1,11 @@
 
 const express = require('express');
-const Razorpay = require('razorpay');
 const crypto = require('crypto');
-const { key_id, key_secret } = require('../config/razorpay');
 const { Enrollment, Course, User } = require('../models');
 const router = express.Router();
 
+const Razorpay = require('razorpay');
+const { key_id, key_secret } = require('../config/razorpay');
 const razorpay = new Razorpay({ key_id, key_secret });
 
 // Create Razorpay order
@@ -29,6 +29,7 @@ router.post('/create-order', async (req, res) => {
 // Verify payment and unlock course
 router.post('/verify', async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseId, userId } = req.body;
+  const { key_secret } = require('../config/razorpay');
   const generated_signature = crypto.createHmac('sha256', key_secret)
     .update(razorpay_order_id + '|' + razorpay_payment_id)
     .digest('hex');
