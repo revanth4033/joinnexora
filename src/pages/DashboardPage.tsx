@@ -158,6 +158,7 @@ const DashboardPage = () => {
           setUser(data.data.user);
           setCertificates(data.data.certificates || []);
           setStats(data.data.stats || null);
+          setEnrollments(data.data.enrollments || []); // Add this line
         }
       } catch (error) {
         console.error("Error fetching dashboard:", error);
