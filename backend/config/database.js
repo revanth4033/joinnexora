@@ -17,7 +17,11 @@ module.exports = {
     }
   },
   production: {
-    url: process.env.DATABASE_URL,
+    username: 'neondb_owner',
+    password: 'npg_ghzCy2IaDcO9',
+    database: 'neondb',
+    host: 'ep-wispy-pine-a1jf2b5d-pooler.ap-southeast-1.aws.neon.tech',
+    port: 5432,
     dialect: 'postgres',
     logging: false,
     pool: {
@@ -30,7 +34,11 @@ module.exports = {
       ssl: {
         require: true,
         rejectUnauthorized: false
-      }
+      },
+      connectTimeout: 60000
+    },
+    retry: {
+      max: 3
     }
   }
 };
