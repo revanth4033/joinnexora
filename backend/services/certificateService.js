@@ -1,20 +1,7 @@
 const PDFDocument = require('pdfkit');
-const AWS = require('aws-sdk');
 const { Certificate } = require('../models');
 const fs = require('fs');
 const path = require('path');
-
-// Configure Wasabi (S3-compatible) only if in production
-let s3 = null;
-if (process.env.NODE_ENV === 'production') {
-  s3 = new AWS.S3({
-    endpoint: new AWS.Endpoint(process.env.WASABI_ENDPOINT),
-    accessKeyId: process.env.WASABI_ACCESS_KEY,
-    secretAccessKey: process.env.WASABI_SECRET_KEY,
-    region: process.env.WASABI_REGION,
-    s3ForcePathStyle: true
-  });
-}
 
 class CertificateService {
   async generateCertificate(studentName, courseName, completionDate, instructorName) {
@@ -121,27 +108,15 @@ class CertificateService {
   }
 
   async uploadCertificate(pdfBuffer, fileName) {
-    if (process.env.NODE_ENV === 'production') {
-      const params = {
-        Bucket: process.env.WASABI_BUCKET_NAME,
-        Key: `certificates/${fileName}`,
-        Body: pdfBuffer,
-        ContentType: 'application/pdf',
-        ACL: 'public-read'
-      };
-      const result = await s3.upload(params).promise();
-      return result.Location;
-    } else {
-      // Local storage in development
-      const certDir = path.join(__dirname, '../certificates');
-      if (!fs.existsSync(certDir)) {
-        fs.mkdirSync(certDir, { recursive: true });
-      }
-      const filePath = path.join(certDir, fileName);
-      fs.writeFileSync(filePath, pdfBuffer);
-      // Return a local file path or URL (adjust as needed for your app)
-      return `/certificates/${fileName}`;
+    // Use local storage for both development and production
+    const certDir = path.join(__dirname, '../certificates');
+    if (!fs.existsSync(certDir)) {
+      fs.mkdirSync(certDir, { recursive: true });
     }
+    const filePath = path.join(certDir, fileName);
+    fs.writeFileSync(filePath, pdfBuffer);
+    // Return a local file path or URL
+    return `/certificates/${fileName}`;
   }
 
   async createCertificateRecord(studentId, courseId, certificateUrl, grade = null) {
