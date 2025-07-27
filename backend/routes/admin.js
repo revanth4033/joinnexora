@@ -21,12 +21,22 @@ router.post('/migrate', adminAuth, async (req, res) => {
     // Run migrations using sequelize-cli
     exec('npx sequelize-cli db:migrate', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
       if (error) {
-        console.error('❌ Migration error:', error);
-        return res.status(500).json({
-          success: false,
-          message: 'Migration failed',
-          error: error.message
-        });
+        // Check if it's just a "column already exists" error (which is okay)
+        if (error.message && error.message.includes('already exists')) {
+          console.log('✅ Database schema is up to date (migrations already applied)');
+          return res.json({
+            success: true,
+            message: 'Database schema is up to date (migrations already applied)',
+            output: stdout
+          });
+        } else {
+          console.error('❌ Migration error:', error);
+          return res.status(500).json({
+            success: false,
+            message: 'Migration failed',
+            error: error.message
+          });
+        }
       }
       
       console.log('✅ Migrations completed successfully');

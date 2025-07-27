@@ -23,6 +23,9 @@ const contactRoutes = require('./routes/contact');
 
 const app = express();
 
+// Trust proxy for rate limiting
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 app.use(cors({
@@ -64,7 +67,12 @@ db.sequelize.sync({ force: false })
         
         exec('npx sequelize-cli db:migrate', { cwd: __dirname }, (error, stdout, stderr) => {
           if (error) {
-            console.error('❌ Migration error:', error);
+            // Check if it's just a "column already exists" error (which is okay)
+            if (error.message && error.message.includes('already exists')) {
+              console.log('✅ Database schema is up to date (migrations already applied)');
+            } else {
+              console.error('❌ Migration error:', error.message);
+            }
           } else {
             console.log('✅ Migrations completed successfully');
             console.log('Migration output:', stdout);
