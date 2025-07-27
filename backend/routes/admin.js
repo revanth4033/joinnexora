@@ -1,22 +1,13 @@
 
 const express = require('express');
 const { User, Course, Enrollment, Certificate, Review, Quiz, Coupon } = require('../models');
-const auth = require('../middleware/auth');
+const { auth, adminAuth } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const { Sequelize } = require('../models');
 
 const router = express.Router();
 
-// Admin middleware
-const adminAuth = (req, res, next) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({
-      success: false,
-      message: 'Access denied. Admin only.'
-    });
-  }
-  next();
-};
+// Admin middleware - using the imported adminAuth from middleware/auth.js
 
 // @route   GET /api/admin/dashboard
 // @desc    Get admin dashboard stats

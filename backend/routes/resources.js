@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Resource, Course, Section, Lesson } = require('../models');
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 
 // Get all resources for a course
 router.get('/course/:courseId', auth, async (req, res) => {

@@ -33,4 +33,29 @@ const auth = async (req, res, next) => {
   }
 };
 
-module.exports = auth;
+// Admin authentication middleware
+const adminAuth = async (req, res, next) => {
+  try {
+    // First authenticate the user
+    await auth(req, res, (err) => {
+      if (err) return next(err);
+    });
+
+    // Then check if user is admin
+    if (!req.user || !req.user.isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      });
+    }
+
+    next();
+  } catch (error) {
+    res.status(403).json({
+      success: false,
+      message: 'Access denied. Admin privileges required.'
+    });
+  }
+};
+
+module.exports = { auth, adminAuth };

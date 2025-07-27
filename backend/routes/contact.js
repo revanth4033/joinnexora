@@ -1,5 +1,6 @@
 const express = require('express');
 const { ContactMessage } = require('../models');
+const { adminAuth } = require('../middleware/auth');
 const router = express.Router();
 
 // POST /api/contact - Save a new contact message
@@ -18,9 +19,7 @@ router.post('/', async (req, res) => {
 });
 
 // GET /api/contact - List all contact messages (admin only)
-router.get('/', async (req, res) => {
-  // TODO: Replace with real admin auth check
-  // if (!req.user || !req.user.isAdmin) return res.status(403).json({ success: false, message: 'Forbidden' });
+router.get('/', adminAuth, async (req, res) => {
   try {
     const messages = await ContactMessage.findAll({ order: [['createdAt', 'DESC']] });
     res.json({ success: true, data: messages });
@@ -31,8 +30,7 @@ router.get('/', async (req, res) => {
 });
 
 // DELETE /api/contact/:id - Delete a contact message (admin only)
-router.delete('/:id', async (req, res) => {
-  // TODO: Replace with real admin auth check
+router.delete('/:id', adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const deleted = await ContactMessage.destroy({ where: { id } });

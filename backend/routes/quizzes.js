@@ -1,7 +1,7 @@
 
 const express = require('express');
 const { Quiz, QuizAttempt, Course, Certificate } = require('../models');
-const auth = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const certificateService = require('../services/certificateService');
 const emailService = require('../services/emailService');
 
