@@ -4,10 +4,49 @@ const { User, Course, Enrollment, Certificate, Review, Quiz, Coupon } = require(
 const { auth, adminAuth } = require('../middleware/auth');
 const { Op } = require('sequelize');
 const { Sequelize } = require('../models');
+const { exec } = require('child_process');
+const path = require('path');
 
 const router = express.Router();
 
 // Admin middleware - using the imported adminAuth from middleware/auth.js
+
+// @route   POST /api/admin/migrate
+// @desc    Run database migrations
+// @access  Private (Admin)
+router.post('/migrate', adminAuth, async (req, res) => {
+  try {
+    console.log('🔄 Running database migrations...');
+    
+    // Run migrations using sequelize-cli
+    exec('npx sequelize-cli db:migrate', { cwd: path.join(__dirname, '..') }, (error, stdout, stderr) => {
+      if (error) {
+        console.error('❌ Migration error:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Migration failed',
+          error: error.message
+        });
+      }
+      
+      console.log('✅ Migrations completed successfully');
+      console.log('Migration output:', stdout);
+      
+      res.json({
+        success: true,
+        message: 'Database migrations completed successfully',
+        output: stdout
+      });
+    });
+  } catch (error) {
+    console.error('❌ Migration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Migration failed',
+      error: error.message
+    });
+  }
+});
 
 // @route   GET /api/admin/dashboard
 // @desc    Get admin dashboard stats

@@ -52,8 +52,28 @@ app.use(passport.session());
 
 // Database connection and sync
 db.sequelize.sync({ force: false })
-  .then(() => {
+  .then(async () => {
     console.log('✅ Database connected and synced');
+    
+    // Run migrations automatically in production
+    if (process.env.NODE_ENV === 'production') {
+      try {
+        console.log('🔄 Running database migrations...');
+        const { exec } = require('child_process');
+        const path = require('path');
+        
+        exec('npx sequelize-cli db:migrate', { cwd: __dirname }, (error, stdout, stderr) => {
+          if (error) {
+            console.error('❌ Migration error:', error);
+          } else {
+            console.log('✅ Migrations completed successfully');
+            console.log('Migration output:', stdout);
+          }
+        });
+      } catch (err) {
+        console.error('❌ Migration error:', err);
+      }
+    }
   })
   .catch(err => {
     console.error('❌ Database connection error:', err);
