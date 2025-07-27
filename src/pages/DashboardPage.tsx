@@ -88,6 +88,7 @@ interface DashboardStats {
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [progressMap, setProgressMap] = useState<{ [courseId: string]: string[] }>({});
@@ -95,6 +96,23 @@ const DashboardPage = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState<User | null>(null);
+
+  // Add error boundary
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Dashboard Error</h1>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>Reload Page</Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   // Fetch all progress on mount and when lesson progress is updated
   useEffect(() => {
@@ -131,7 +149,8 @@ const DashboardPage = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("/api/users/dashboard", {
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://joinnexora-backend.onrender.com';
+        const res = await fetch(`${apiUrl}/api/users/dashboard`, {
           headers: { Authorization: token ? `Bearer ${token}` : "" }
         });
         const data = await res.json();
@@ -142,6 +161,7 @@ const DashboardPage = () => {
         }
       } catch (error) {
         console.error("Error fetching dashboard:", error);
+        setError("Failed to load dashboard data. Please try again.");
       }
       setLoading(false);
     };

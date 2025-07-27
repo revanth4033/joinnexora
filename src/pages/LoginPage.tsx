@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { BookOpen, Mail, Lock, Eye, EyeOff, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -30,7 +31,7 @@ const LoginPage = () => {
             localStorage.setItem("user", JSON.stringify(data.user));
             localStorage.setItem("userId", data.user.id);
           }
-          window.location.href = "/dashboard";
+          navigate("/dashboard");
         });
     }
   }, []);
@@ -73,11 +74,11 @@ const LoginPage = () => {
             }
           });
           if (data.user.role === "admin") {
-            window.location.href = "/admin";
+            navigate("/admin");
             return;
           }
         }
-        window.location.href = "/dashboard";
+        navigate("/dashboard");
       } else {
         toast.error(data.message || "Login failed");
       }
